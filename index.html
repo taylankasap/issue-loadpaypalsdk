@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>loadPaypalSDK Issue</title>
+    <script
+      async
+      src="https://js.braintreegateway.com/web/3.76.4/js/client.min.js"
+    ></script>
+    <script
+      async
+      src="https://js.braintreegateway.com/web/3.76.4/js/paypal-checkout.min.js"
+    ></script>
+    <script>
+      window.onload = function () {
+        braintree.client
+          .create({
+            authorization:
+              "token",
+          })
+          .then(function (clientInstance) {
+            return braintree.paypalCheckout.create({
+              autoSetDataUserIdToken: true,
+              client: clientInstance,
+            });
+          })
+          .then(function (paypalCheckoutInstance) {
+            return paypalCheckoutInstance.loadPayPalSDK({
+              currency: "USD",
+              intent: "capture",
+            });
+          })
+          .then(function (paypalCheckoutInstance) {
+            let intentId = "";
+
+            return window.paypal
+              .Buttons({
+                style: {
+                  layout: "horizontal",
+                  size: "responsive",
+                  label: "checkout",
+                  tagline: "false",
+                  color: "gold",
+                  shape: "rect",
+                  height: 44,
+                },
+
+                fundingSource: window.paypal.FUNDING.PAYPAL,
+                onClick() {
+                  return true;
+                },
+                createOrder() {
+                  console.log("createOrder");
+                },
+                onApprove(data) {
+                  console.log("onApprove", data);
+                  // return paypalCheckoutInstance
+                  //   .tokenizePayment(data)
+                  //   .then((payload) => {
+                  //     placeOrder({
+                  //       nonce: payload.nonce,
+                  //       intentId,
+                  //       paymentMethodToken: paypalSelectedAccountToken,
+                  //     });
+                  //   });
+                },
+
+                onCancel() {
+                  // TODO failure payment call
+                },
+
+                onError(err) {
+                  console.error("PayPal error", err);
+                },
+              })
+              .render("#paypal-button");
+          });
+      };
+    </script>
+  </head>
+  <body>
+    <div id="paypal-button"></div>
+  </body>
+</html>
